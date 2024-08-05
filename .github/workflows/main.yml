@@ -9,7 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: env 
 
     steps:
     - name: Checkout code
@@ -23,21 +22,29 @@ jobs:
     - name: Deploy to EC2 for Main Branch
       if: github.ref == 'refs/heads/main'
       run: |
+        echo "Deploying main branch..."
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          sudo -u www-data bash << 'EOS'
-          cd /var/www/wordpress-main
+          cd /var/www/wordpress-main || exit
+          
+          # Ensure git is aware of the repository
+          sudo chown -R www-data:www-data /var/www/wordpress-main
           git config --global --add safe.directory /var/www/wordpress-main
+
+          # Pull the latest changes for main
           git pull origin main
-          EOS
         EOF
 
     - name: Deploy to EC2 for Staging Branch
       if: github.ref == 'refs/heads/staging'
       run: |
+        echo "Deploying staging branch..."
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          sudo -u www-data bash << 'EOS'
-          cd /var/www/wordpress-staging
+          cd /var/www/wordpress-staging || exit
+          
+          # Ensure git is aware of the repository
+          sudo chown -R www-data:www-data /var/www/wordpress-staging
           git config --global --add safe.directory /var/www/wordpress-staging
+
+          # Pull the latest changes for staging
           git pull origin staging
-          EOS
         EOF
