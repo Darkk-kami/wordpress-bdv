@@ -3,11 +3,11 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main  # or 'staging' if you want to deploy on pushes to the staging branch
-
+      - main 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: env
 
     steps:
     - name: Checkout code
@@ -25,4 +25,3 @@ jobs:
           git pull origin main  # or staging
           # Include other deployment commands here
         EOF
-
