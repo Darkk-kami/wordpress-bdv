@@ -3,11 +3,14 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main 
+      - main
+      - staging
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: env
+    environment: production  # Specify the environment name if used
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -17,10 +20,41 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to EC2
+    - name: Deploy to EC2 for Main Branch
+      if: github.ref == 'refs/heads/main'
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Navigate to the directory for the main branch
           cd /var/www/wordpress-main
-          git pull origin main
+
+          # Trust the repository directory
+          git config --global --add safe.directory /var/www/wordpress-main
+
+          # Ensure we're in a Git repository and pull the latest changes
+          if [ -d ".git" ]; then
+            git pull origin main
+          else
+            echo "Not a git repository, exiting"
+            exit 1
+          fi
+        EOF
+
+    - name: Deploy to EC2 for Staging Branch
+      if: github.ref == 'refs/heads/staging'
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Navigate to the directory for the staging branch
+          cd /var/www/wordpress-staging
+
+          # Trust the repository directory
+          git config --global --add safe.directory /var/www/wordpress-staging
+
+          # Ensure we're in a Git repository and pull the latest changes
+          if [ -d ".git" ]; then
+            git pull origin staging
+          else
+            echo "Not a git repository, exiting"
+            exit 1
+          fi
         EOF
 
