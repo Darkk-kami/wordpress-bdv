@@ -1,10 +1,9 @@
-name: Deploy to Server
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - main
-      - staging
+      - main  # or 'staging' if you want to deploy on pushes to the staging branch
 
 jobs:
   deploy:
@@ -14,25 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up SSH agent
+    - name: Set up SSH
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to Server
-      env:
-        SSH_USER: ${{ secrets.SSH_USER }}
-        SSH_HOST: ${{ secrets.SSH_HOST }}
+    - name: Deploy to EC2
       run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          TARGET_DIR="/var/www/wordpress-main"
-        elif [ "${{ github.ref }}" == "refs/heads/staging" ]; then
-          TARGET_DIR="/var/www/wordpress-staging"
-        else
-          echo "Branch is not main or staging. Exiting."
-          exit 1
-        fi
-        
-        rsync -avz --delete --exclude '.git' ./ $SSH_USER@$SSH_HOST:$TARGET_DIR
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /path/to/your/application
+          git pull origin main  # or staging
+          # Include other deployment commands here
+        EOF
 
-        ssh $SSH_USER@$SSH_HOST "sudo chown -R www-data:www-data $TARGET_DIR && sudo service apache2 reload"
