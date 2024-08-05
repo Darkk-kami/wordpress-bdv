@@ -24,37 +24,20 @@ jobs:
       if: github.ref == 'refs/heads/main'
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Navigate to the directory for the main branch
+          sudo -u www-data bash << 'EOS'
           cd /var/www/wordpress-main
-
-          # Trust the repository directory
           git config --global --add safe.directory /var/www/wordpress-main
-
-          # Ensure we're in a Git repository and pull the latest changes
-          if [ -d ".git" ]; then
-            git pull origin main
-          else
-            echo "Not a git repository, exiting"
-            exit 1
-          fi
+          git pull origin main
+          EOS
         EOF
 
     - name: Deploy to EC2 for Staging Branch
       if: github.ref == 'refs/heads/staging'
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Navigate to the directory for the staging branch
+          sudo -u www-data bash << 'EOS'
           cd /var/www/wordpress-staging
-
-          # Trust the repository directory
           git config --global --add safe.directory /var/www/wordpress-staging
-
-          # Ensure we're in a Git repository and pull the latest changes
-          if [ -d ".git" ]; then
-            git pull origin staging
-          else
-            echo "Not a git repository, exiting"
-            exit 1
-          fi
+          git pull origin staging
+          EOS
         EOF
-
