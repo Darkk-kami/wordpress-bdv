@@ -8,7 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: env
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -21,7 +20,7 @@ jobs:
     - name: Deploy to EC2
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /path/to/your/application
-          git pull origin main  # or staging
-          # Include other deployment commands here
+          cd /var/www/wordpress-main
+          git pull origin main
         EOF
+
