@@ -32,7 +32,7 @@ jobs:
           git config --global --add safe.directory /var/www/wordpress-main
 
           # Pull the latest changes for main
-          git pull origin main
+          sudo -u www-data git pull origin main
         EOF
 
     - name: Deploy to EC2 for Staging Branch
@@ -47,5 +47,5 @@ jobs:
           git config --global --add safe.directory /var/www/wordpress-staging
 
           # Pull the latest changes for staging
-          git pull origin staging
+          sudo -u www-data git pull origin staging
         EOF
