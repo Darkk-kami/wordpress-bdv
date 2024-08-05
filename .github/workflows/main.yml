@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: env
+    environment: env 
 
     steps:
     - name: Checkout code
@@ -36,12 +36,6 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           sudo -u www-data bash << 'EOS'
-          cd /var/www/wordpress-staging
-          git config --global --add safe.directory /var/www/wordpress-staging
-          git pull origin staging
-          EOS
-        EOF
-
           cd /var/www/wordpress-staging
           git config --global --add safe.directory /var/www/wordpress-staging
           git pull origin staging
