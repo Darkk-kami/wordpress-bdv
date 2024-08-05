@@ -41,3 +41,9 @@ jobs:
           git pull origin staging
           EOS
         EOF
+
+          cd /var/www/wordpress-staging
+          git config --global --add safe.directory /var/www/wordpress-staging
+          git pull origin staging
+          EOS
+        EOF
