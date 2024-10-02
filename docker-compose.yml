@@ -11,6 +11,8 @@ services:
       WORDPRESS_DB_NAME: wordpress
     depends_on:
       - db
+    volumes:
+      - wordpress_data:/var/www/wordpress-main
 
   db:
     image: "mysql"
@@ -18,3 +20,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+    driver: local
+  db_data:
+    driver: local
