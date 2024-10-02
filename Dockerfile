@@ -1,19 +1,45 @@
-FROM php:7.2-apache
+FROM php:8.3-apache
 
-RUN apt update && apt upgrade -y && apt install -y \
-                 ghostscript \
-                 libapache2-mod-php \
-                 mysql-server \
-                 php \
-                 php-bcmath \
-                 php-curl \
-                 php-imagick \
-                 php-intl \
-                 php-json \
-                 php-mbstring \
-                 php-mysql \
-                 php-xml \
-                 php-zip
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		ghostscript \
+	rm -rf /var/lib/apt/lists/*
+
+RUN apk add --no-cache \
+		bash \
+		less \
+		mysql-client
+
+
+RUN	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		libavif-dev \
+		libfreetype6-dev \
+		libicu-dev \
+		libjpeg-dev \
+		libmagickwand-dev \
+		libpng-dev \
+		libwebp-dev \
+		libzip-dev \
+
+RUN	docker-php-ext-configure gd \
+		--with-avif \
+		--with-freetype \
+		--with-jpeg \
+		--with-webp \
+
+RUN	docker-php-ext-install -j "$(nproc)" \
+		bcmath \
+		exif \
+		gd \
+		intl \
+		mysqli \
+		zip
+
+RUN	pecl install imagick-3.7.0; \
+	docker-php-ext-enable imagick; \
+	rm -r /tmp/pear; \
 
 COPY wordpress.conf /etc/apache2/sites-available/
 
