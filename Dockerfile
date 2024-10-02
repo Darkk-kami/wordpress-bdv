@@ -1,51 +1,57 @@
 FROM php:8.3-apache
 
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends \
-		ghostscript \
-	rm -rf /var/lib/apt/lists/*
+        apt-get update; \
+        apt-get install -y --no-install-recommends \
+                ghostscript; \
+        rm -rf /var/lib/apt/lists/*
 
-RUN apk add --no-cache \
-		bash \
-		less \
-		mysql-client
+RUN set -eux; \
+        apt-get update; \
+        apt-get install -y --no-install-recommends \
+                bash \
+                less; \
+        rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+        apt-get update; \
+        apt-get install -y --no-install-recommends \
+                libavif-dev \
+                libfreetype6-dev \
+                libicu-dev \
+                libjpeg-dev \
+                libmagickwand-dev \
+                libpng-dev \
+                libwebp-dev \
+                libzip-dev; \
+        rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+        docker-php-ext-configure gd \
+                --with-avif \
+                --with-freetype \
+                --with-jpeg \
+                --with-webp
 
 
-RUN	apt-get update; \
-	apt-get install -y --no-install-recommends \
-		libavif-dev \
-		libfreetype6-dev \
-		libicu-dev \
-		libjpeg-dev \
-		libmagickwand-dev \
-		libpng-dev \
-		libwebp-dev \
-		libzip-dev \
+RUN     docker-php-ext-install -j "$(nproc)" \
+                bcmath \
+                exif \
+                gd \
+                intl \
+                mysqli \
+                zip
 
-RUN	docker-php-ext-configure gd \
-		--with-avif \
-		--with-freetype \
-		--with-jpeg \
-		--with-webp \
+RUN     pecl install imagick-3.7.0; \
+        docker-php-ext-enable imagick; \
+        rm -r /tmp/pear
 
-RUN	docker-php-ext-install -j "$(nproc)" \
-		bcmath \
-		exif \
-		gd \
-		intl \
-		mysqli \
-		zip
-
-RUN	pecl install imagick-3.7.0; \
-	docker-php-ext-enable imagick; \
-	rm -r /tmp/pear; \
 
 COPY wordpress.conf /etc/apache2/sites-available/
 
 COPY . /var/www/wordpress-main/
 
-# Set the working directory
+
 WORKDIR /var/www/wordpress-main/
 
 # Delete existing salt definitions in wp-config.php
@@ -56,7 +62,9 @@ RUN sed -i '/define(.*_KEY/d; /define(.*_SALT/d' wp-config.php && \
     rm /tmp/wp-salts
 
 
-RUN a2ensite wordpress && a2ensite rewrite && a2dissite 000-default
+RUN a2enmod rewrite && \
+    a2ensite wordpress && \
+    a2dissite 000-default
 
 EXPOSE 80
 
